@@ -1,0 +1,59 @@
+#cloud-config
+users:
+  - name: ubuntu # Benutzername
+    sudo: ALL=(ALL) NOPASSWD:ALL # Alle User sind SuperUser. Nicht passwortgeschützt
+    groups: users, admin # User Gruppen
+    home: /home/ubuntu # Homeverzeichnis für User ubuntu
+    shell: /bin/bash # Linux Terminal
+    ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCvEbEY/GFIEDcgBFNwxcbtw9ztNqNXKhekkTDZWZZUMAqgHQQ1FBTIKAxMH8FkNn1bUh5G6bsXO1UDuIQTL3BCFA6K9XnlxjkLNbtgBMlYM7q9PMXmcyTI7MP1FMP3Fy9Axn0apvLAOoH4GVAM+Zz/paJvrNvZAyHeguAW4GGgriU1F/Xvld3T+iCw+1kAs+mtPhDzHmUO3Ye+ZjoUzF7rAPefncqUYTnPSA006VFFcMjtjy5Emav4e0PYEkjBqiFNpXldcpOJYZIT2blku3YEcooicEBXDovcOMwGOV9N383a/8n5Q1chVREy5u0GN43OYoIslBFEeqAnTa5uDsIl tbz_aws-bruhin
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDyWyGTDzzqq9YjuMqsrcXRMhZVrCbD+cnL2YLpTLbTli2jXcX6mISWVzrPQWEkF5OPWCVtWpUpyEgjwe7m7E5zvpI0bGiPrdzrPmO5SMhFI0gRJK5VdJEVl59XColb4ueqh3cwvpbX2kMV8fq04WY+So8mGFlZ+EB+SdvWkgdzde0KOoX8pZQje/rD6GpHF9Jjul075D1kmlS4aUlUmGkM3c6Z5j/phLjyTRayKOD/dZyTEVSGZaS9csd3Qu/b98qoH9VpvG7+ri+RNMh3IYkIpORJjhlCxxvb6uTR89WcvNT94kNBA0GUECQkguElLjx9WSR0RwimfOv4b+Ewj/sX tbz_aws_atilgan
+ssh_pwauth: false
+disable_root: false 
+package_update: true
+package_reboot_if_required: true
+packages:
+  - adminer
+  - apache2
+  - libapache2-mod-php
+  - php
+
+write_files:
+  - path: /var/www/html/db.php
+    content: |
+      <?php
+        $servername = "172.31.48.10";
+        $username = "admin";
+        $password = "12345678";
+        $dbname = "mysql";
+
+        $mysqli = new mysqli($servername, $username, $password, $dbname);
+        if ($mysqli->connect_error) {
+          die("Connection failed: " . $mysqli->connect_error);
+        }
+        echo "Connected successfully";
+
+        $sql = "select Host, User from mysql.user;";
+        $result = $mysqli->query($sql);
+        while ($row = $result->fetch_assoc()) {
+          echo("<li>".$row["Host"]."/".$row["User"]. "</li>");
+        }
+      ?>
+  - path: /var/www/html/index.html
+    content: |
+      <html>
+        <head><title>RAB KN05 Instance</title></head>
+        <body><h1>Welcome on the AWS hosted Web Server of RAB</h1></body>
+      </html>
+  - path: /var/www/html/info.php
+    content: |
+      <?php
+        phpinfo();
+      ?>
+
+runcmd:
+  - [sh, -c, "sudo a2enconf adminer"]
+  - [sh, -c, "sudo systemctl restart apache2"]
+  - [sh, -c, "sudo ufw allow 80/tcp"]
+  - [sh, -c, "sudo ufw allow 22/tcp"]
+  - [sh, -c, "sudo ufw enable"]
