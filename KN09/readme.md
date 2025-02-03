@@ -14,8 +14,8 @@
 
 **Abgaben**:
 
-1. [Terraform Konfiguration](./main.tf)
-[Terraform Variablen](./variables.tf)
+1. [Terraform Konfiguration](./terraform/main.tf)
+[Terraform Variablen](./terraform/variables.tf)
 
 2. Screenshot des Telnet-Befehls der zeigt, dass Ihr Datenbank-Zugriff auch tatsächlich funktioniert
 ![DB Connection](./image/KN09_connect_db.png)
